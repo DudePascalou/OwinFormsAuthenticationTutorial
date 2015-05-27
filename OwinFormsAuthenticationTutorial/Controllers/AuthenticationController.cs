@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using OwinFormsAuthenticationTutorial.Models;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
@@ -32,9 +33,13 @@ namespace OwinFormsAuthenticationTutorial.Controllers
             }
 
             // L'authentification est réussie, 
-            // injecter l'identifiant utilisateur dans le cookie d'authentification :
-            var loginClaim = new Claim(ClaimTypes.NameIdentifier, model.Login);
-            var claimsIdentity = new ClaimsIdentity(new[] { loginClaim }, DefaultAuthenticationTypes.ApplicationCookie);
+            // injecter les informations utilisateur dans le cookie d'authentification :
+            var userClaims = new List<Claim>();
+            // Identifiant utilisateur :
+            userClaims.Add(new Claim(ClaimTypes.NameIdentifier, model.Login));
+            // Rôles utilisateur :
+            userClaims.AddRange(LoadRoles(model.Login));
+            var claimsIdentity = new ClaimsIdentity(userClaims, DefaultAuthenticationTypes.ApplicationCookie);
             var ctx = Request.GetOwinContext();
             var authenticationManager = ctx.Authentication;
             authenticationManager.SignIn(claimsIdentity);
@@ -52,6 +57,15 @@ namespace OwinFormsAuthenticationTutorial.Controllers
 
             // Pour ce tutoriel, j'utilise une validation extrêmement sécurisée...
             return login == password;
+        }
+
+        private IEnumerable<Claim> LoadRoles(string login)
+        {
+            // TODO : Charger ici les rôles de l'utilisateur...
+
+            // Pour ce tutoriel, je considère que l'utilisateur a les rôles "Contributeur" et "Modérateur" :
+            yield return new Claim(ClaimTypes.Role, "Contributeur");
+            yield return new Claim(ClaimTypes.Role, "Modérateur");
         }
 
         [HttpGet]
