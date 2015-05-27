@@ -53,5 +53,16 @@ namespace OwinFormsAuthenticationTutorial.Controllers
             // Pour ce tutoriel, j'utilise une validation extrêmement sécurisée...
             return login == password;
         }
+
+        [HttpGet]
+        public ActionResult Logout()
+        {
+            var ctx = Request.GetOwinContext();
+            var authenticationManager = ctx.Authentication;
+            authenticationManager.SignOut();
+
+            // Rediriger vers la page d'accueil :
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
